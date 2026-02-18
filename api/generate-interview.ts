@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Anthropic from '@anthropic-ai/sdk'
 import { getSessionInfo, applyRateLimit, supabase } from '../lib/server/auth.js'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { callLLM } from '../lib/server/llmService.js'
+import type { LLMProvider } from '../lib/server/llmService.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyRateLimit(session, res)) return
 
   try {
-    const { jdAnalysisId, interviewType, questionCount } = req.body
+    const { jdAnalysisId, interviewType, questionCount, provider = 'anthropic' } = req.body
 
     // Fetch the JD analysis
     const { data: jd, error: jdError } = await supabase
@@ -27,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ message: 'JD analysis not found' })
     }
 
-    // Generate questions via Claude
+    // Generate questions via LLM
     const prompt = `You are an expert PM interviewer. Based on the following job description, generate exactly ${questionCount} interview questions.
 
 Job Description:
@@ -45,18 +44,9 @@ Return a JSON array of objects with these fields:
 
 Return ONLY the JSON array, no other text.`
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 2048,
-      messages: [{ role: 'user', content: prompt }],
-    })
+    const response = await callLLM(provider as LLMProvider, prompt, 2048)
 
-    const content = message.content[0]
-    if (content.type !== 'text') {
-      return res.status(500).json({ message: 'Unexpected AI response format' })
-    }
-
-    const text = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    const text = response.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
     const questions = JSON.parse(text)
 
     // Use authenticated user ID if available, otherwise use JD owner

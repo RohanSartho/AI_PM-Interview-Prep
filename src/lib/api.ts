@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/stores/authStore'
-import type { ParsedJD } from '@/types/interview'
+import type { ParsedJD, LLMProvider } from '@/types/interview'
 
 const API_BASE = '/api'
 
@@ -55,8 +55,8 @@ interface ParseJDResponse {
 }
 
 export const api = {
-  parseJD: async (rawText: string, resumeText?: string): Promise<ParsedJD> => {
-    const data = await request<ParseJDResponse>('/parse-jd', { rawText, resumeText })
+  parseJD: async (rawText: string, resumeText?: string, provider?: LLMProvider): Promise<ParsedJD> => {
+    const data = await request<ParseJDResponse>('/parse-jd', { rawText, resumeText, provider })
     return {
       company: data.company,
       roleTitle: data.role_title,
@@ -71,8 +71,9 @@ export const api = {
     jdAnalysisId: string
     interviewType: string
     questionCount: number
+    provider?: LLMProvider
   }) => request<{ sessionId: string }>('/generate-interview', body),
 
-  submitAnswer: (body: { questionId: string; userAnswer: string }) =>
+  submitAnswer: (body: { questionId: string; userAnswer: string; provider?: LLMProvider }) =>
     request<{ score: number; feedback: string }>('/submit-answer', body),
 }

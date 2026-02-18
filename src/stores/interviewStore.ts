@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { supabase } from '@/lib/supabase'
 import { api } from '@/lib/api'
 import type { InterviewSession, Question } from '@/types/database'
+import type { LLMProvider } from '@/types/interview'
 
 interface InterviewState {
   session: InterviewSession | null
@@ -13,6 +14,7 @@ interface InterviewState {
     jdAnalysisId: string,
     interviewType: 'behavioral' | 'technical' | 'mixed',
     questionCount: number,
+    provider?: LLMProvider,
   ) => Promise<string>
   loadSession: (sessionId: string) => Promise<void>
   submitAnswer: (questionId: string, answer: string) => Promise<void>
@@ -26,13 +28,14 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   loading: false,
   error: null,
 
-  createSession: async (jdAnalysisId, interviewType, questionCount) => {
+  createSession: async (jdAnalysisId, interviewType, questionCount, provider) => {
     set({ loading: true, error: null })
     try {
       const { sessionId } = await api.generateInterview({
         jdAnalysisId,
         interviewType,
         questionCount,
+        provider,
       })
       return sessionId
     } catch (e) {
@@ -67,10 +70,13 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
 
   submitAnswer: async (questionId, answer) => {
     set({ loading: true })
+    const stored = localStorage.getItem('llm_provider')
+    const provider = (stored === 'groq' || stored === 'openrouter') ? stored : 'anthropic' as LLMProvider
     try {
       const { score, feedback } = await api.submitAnswer({
         questionId,
         userAnswer: answer,
+        provider,
       })
 
       set({

@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Anthropic from '@anthropic-ai/sdk'
 import { getSessionInfo, applyRateLimit, supabase } from '../lib/server/auth.js'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { callLLM } from '../lib/server/llmService.js'
+import type { LLMProvider } from '../lib/server/llmService.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -14,7 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (applyRateLimit(session, res)) return
 
   try {
-    const { questionId, userAnswer } = req.body
+    const { questionId, userAnswer, provider = 'anthropic' } = req.body
 
     // Fetch the question
     const { data: question, error: qError } = await supabase
@@ -27,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(404).json({ message: 'Question not found' })
     }
 
-    // Evaluate answer via Claude
+    // Evaluate answer via LLM
     const prompt = `You are an expert PM interview coach. Evaluate the following answer.
 
 Question: ${question.question_text}
@@ -40,18 +39,9 @@ Provide:
 
 Return ONLY a JSON object with fields: "score" (number) and "feedback" (string). No other text.`
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 512,
-      messages: [{ role: 'user', content: prompt }],
-    })
+    const response = await callLLM(provider as LLMProvider, prompt, 512)
 
-    const content = message.content[0]
-    if (content.type !== 'text') {
-      return res.status(500).json({ message: 'Unexpected AI response format' })
-    }
-
-    const text = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    const text = response.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
     const { score, feedback } = JSON.parse(text)
 
     // Update question with answer and feedback

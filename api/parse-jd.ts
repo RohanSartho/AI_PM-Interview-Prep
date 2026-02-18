@@ -1,8 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import Anthropic from '@anthropic-ai/sdk'
 import { getSessionInfo, applyRateLimit } from '../lib/server/auth.js'
-
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+import { callLLM, ProviderRateLimitError, ProviderAuthError } from '../lib/server/llmService.js'
+import type { LLMProvider } from '../lib/server/llmService.js'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -13,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const session = await getSessionInfo(req)
   if (applyRateLimit(session, res)) return
 
-  const { rawText, resumeText } = req.body ?? {}
+  const { rawText, resumeText, provider = 'anthropic' } = req.body ?? {}
 
   if (!rawText || typeof rawText !== 'string' || rawText.trim().length < 20) {
     return res.status(400).json({ message: 'rawText is required and must be at least 20 characters' })
@@ -37,25 +36,16 @@ ${rawText}
 
 Return ONLY valid JSON matching the schema above. No markdown, no explanation.`
 
-    const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    })
-
-    const content = message.content[0]
-    if (content.type !== 'text') {
-      return res.status(500).json({ message: 'Unexpected AI response format' })
-    }
+    const response = await callLLM(provider as LLMProvider, prompt, 1024)
 
     // Strip markdown fences if the model wraps the JSON
-    const text = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    const text = response.content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
 
     let parsed
     try {
       parsed = JSON.parse(text)
     } catch {
-      return res.status(502).json({ message: 'AI returned invalid JSON', raw: content.text })
+      return res.status(502).json({ message: 'AI returned invalid JSON', raw: response.content })
     }
 
     // Validate required fields exist
@@ -68,10 +58,10 @@ Return ONLY valid JSON matching the schema above. No markdown, no explanation.`
 
     return res.status(200).json(parsed)
   } catch (error: unknown) {
-    if (error instanceof Anthropic.RateLimitError) {
+    if (error instanceof ProviderRateLimitError) {
       return res.status(429).json({ message: 'Rate limited by AI provider. Please try again in a moment.' })
     }
-    if (error instanceof Anthropic.AuthenticationError) {
+    if (error instanceof ProviderAuthError) {
       return res.status(500).json({ message: 'AI API key misconfigured' })
     }
     console.error('parse-jd error:', error)

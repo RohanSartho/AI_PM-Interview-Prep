@@ -1,3 +1,5 @@
+export type LLMProvider = 'anthropic' | 'groq' | 'openrouter'
+
 export interface ParsedJD {
   company: string
   roleTitle: string

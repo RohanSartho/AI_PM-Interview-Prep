@@ -1,18 +1,20 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import JDInput from '@/components/jd-parser/JDInput'
+import LLMProviderSelect, { getSelectedProvider } from '@/components/ui/LLMProviderSelect'
 import { api, RateLimitError } from '@/lib/api'
 import { useJDStore } from '@/stores/jdStore'
 import { useInterviewStore } from '@/stores/interviewStore'
 import { useAuthStore } from '@/stores/authStore'
 import { checkRateLimit, incrementRateLimit } from '@/utils/rateLimiter'
-import type { ParsedJD } from '@/types/interview'
+import type { ParsedJD, LLMProvider } from '@/types/interview'
 
 export default function JDParser() {
   const [parsed, setParsed] = useState<ParsedJD | null>(null)
   const [parseLoading, setParseLoading] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
   const [rateLimited, setRateLimited] = useState(false)
+  const [provider, setProvider] = useState<LLMProvider>(getSelectedProvider)
   const [interviewType, setInterviewType] = useState<'behavioral' | 'technical' | 'mixed'>('mixed')
   const [questionCount, setQuestionCount] = useState(5)
 
@@ -44,7 +46,7 @@ export default function JDParser() {
     }
 
     try {
-      const result = await api.parseJD(jdText, resumeText)
+      const result = await api.parseJD(jdText, resumeText, provider)
       setParsed(result)
 
       // Track usage client-side for anonymous users
@@ -73,6 +75,7 @@ export default function JDParser() {
       currentAnalysis.id,
       interviewType,
       questionCount,
+      provider,
     )
     navigate(`/interview/${sessionId}`)
   }
@@ -104,6 +107,9 @@ export default function JDParser() {
           </Link>
         </div>
       )}
+
+      {/* LLM Provider Selector */}
+      <LLMProviderSelect value={provider} onChange={setProvider} />
 
       {!parsed ? (
         <>
