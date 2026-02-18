@@ -1,73 +1,70 @@
-# React + TypeScript + Vite
+# AI PM Interview Prep
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI-powered product manager interview preparation tool. Paste a job description, get it analyzed, and practice with tailored mock interview questions evaluated by AI.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Frontend:** React 19 + TypeScript + Tailwind CSS v4 + Zustand
+- **Backend:** Vercel Serverless Functions
+- **Database & Auth:** Supabase (PostgreSQL + Auth + Storage)
+- **AI:** Anthropic Claude Sonnet 4.5
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- JD parsing with AI-powered skill/responsibility extraction
+- Optional resume upload for personalized analysis
+- Mock interview generation (behavioral, technical, mixed)
+- AI-powered answer evaluation with scoring and feedback
+- Anonymous access with rate limiting (5/day) + unlimited for signed-up users
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. **Clone and install:**
+   ```bash
+   git clone https://github.com/RohanSartho/AI_PM-Interview-Prep.git
+   cd AI_PM-Interview-Prep
+   npm install
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2. **Create `.env`** from the template:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in the values:
+   - `VITE_SUPABASE_URL` - Your Supabase project URL
+   - `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
+   - `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (server-side only)
+   - `ANTHROPIC_API_KEY` - Anthropic API key
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+3. **Set up Supabase:**
+   ```bash
+   npx supabase link --project-ref <your-project-ref>
+   npx supabase db push
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+4. **Run locally:**
+   ```bash
+   npm run dev
+   ```
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server |
+| `npm run build` | Type-check and build for production |
+| `npm run preview` | Preview production build locally |
+
+## Project Structure
+
 ```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+src/
+  components/   # Reusable UI components
+  lib/          # Supabase client, API helpers
+  pages/        # Route pages (Home, Login, Dashboard, JDParser, Interview)
+  stores/       # Zustand stores (auth, JD, interview)
+  types/        # TypeScript types and Supabase generated types
+  utils/        # File parsing, PDF generation, rate limiting
+api/            # Vercel serverless functions
+supabase/       # Migrations
 ```
