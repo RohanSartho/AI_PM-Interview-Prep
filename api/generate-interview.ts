@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
-import { getSessionInfo, applyRateLimit, supabase } from './_auth'
+import { getSessionInfo, applyRateLimit, supabase } from '../lib/server/auth'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
