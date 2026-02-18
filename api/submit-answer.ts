@@ -1,18 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
+import { getSessionInfo, applyRateLimit, supabase } from './_auth'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
+
+  // Auth + rate limit
+  const session = await getSessionInfo(req)
+  if (applyRateLimit(session, res)) return
 
   try {
     const { questionId, userAnswer } = req.body
@@ -52,7 +51,8 @@ Return ONLY a JSON object with fields: "score" (number) and "feedback" (string).
       return res.status(500).json({ message: 'Unexpected AI response format' })
     }
 
-    const { score, feedback } = JSON.parse(content.text)
+    const text = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    const { score, feedback } = JSON.parse(text)
 
     // Update question with answer and feedback
     const { error: updateError } = await supabase

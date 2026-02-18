@@ -3,20 +3,42 @@ import type { ParsedJD } from '@/types/interview'
 
 const API_BASE = '/api'
 
+export class RateLimitError extends Error {
+  resetAt: string
+  constructor(message: string, resetAt: string) {
+    super(message)
+    this.name = 'RateLimitError'
+    this.resetAt = resetAt
+  }
+}
+
 async function request<T>(endpoint: string, body: unknown): Promise<T> {
-  const sessionId = useAuthStore.getState().getSessionIdentifier()
+  const state = useAuthStore.getState()
+  const sessionId = state.getSessionIdentifier()
+  const accessToken = state.session?.access_token
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-Session-Id': sessionId,
+  }
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`
+  }
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Session-Id': sessionId,
-    },
+    headers,
     body: JSON.stringify(body),
   })
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'Request failed' }))
+    if (res.status === 429) {
+      throw new RateLimitError(
+        error.message ?? 'Rate limit exceeded',
+        error.resetAt ?? '',
+      )
+    }
     throw new Error(error.message ?? `API error: ${res.status}`)
   }
 

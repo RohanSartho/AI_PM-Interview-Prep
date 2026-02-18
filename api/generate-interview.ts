@@ -1,18 +1,17 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
+import { getSessionInfo, applyRateLimit, supabase } from './_auth'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
+
+  // Auth + rate limit
+  const session = await getSessionInfo(req)
+  if (applyRateLimit(session, res)) return
 
   try {
     const { jdAnalysisId, interviewType, questionCount } = req.body
@@ -57,13 +56,17 @@ Return ONLY the JSON array, no other text.`
       return res.status(500).json({ message: 'Unexpected AI response format' })
     }
 
-    const questions = JSON.parse(content.text)
+    const text = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
+    const questions = JSON.parse(text)
+
+    // Use authenticated user ID if available, otherwise use JD owner
+    const userId = session.userId ?? jd.user_id
 
     // Create session
-    const { data: session, error: sessionError } = await supabase
+    const { data: interviewSession, error: sessionError } = await supabase
       .from('interview_sessions')
       .insert({
-        user_id: jd.user_id,
+        user_id: userId,
         jd_analysis_id: jdAnalysisId,
         interview_type: interviewType,
         total_questions: questionCount,
@@ -73,13 +76,13 @@ Return ONLY the JSON array, no other text.`
       .select()
       .single()
 
-    if (sessionError || !session) {
+    if (sessionError || !interviewSession) {
       return res.status(500).json({ message: 'Failed to create session' })
     }
 
     // Insert questions
     const questionRows = questions.map((q: Record<string, unknown>, i: number) => ({
-      session_id: session.id,
+      session_id: interviewSession.id,
       question_text: q.questionText,
       question_type: q.questionType,
       difficulty: q.difficulty,
@@ -95,7 +98,7 @@ Return ONLY the JSON array, no other text.`
       return res.status(500).json({ message: 'Failed to save questions' })
     }
 
-    return res.status(200).json({ sessionId: session.id })
+    return res.status(200).json({ sessionId: interviewSession.id })
   } catch (error) {
     console.error('generate-interview error:', error)
     return res.status(500).json({ message: 'Internal server error' })

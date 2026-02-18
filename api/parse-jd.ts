@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
+import { getSessionInfo, applyRateLimit } from './_auth'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -7,6 +8,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
+
+  // Auth + rate limit
+  const session = await getSessionInfo(req)
+  if (applyRateLimit(session, res)) return
 
   const { rawText, resumeText } = req.body ?? {}
 
