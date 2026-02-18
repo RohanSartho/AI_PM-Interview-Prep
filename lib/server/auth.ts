@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
-import { checkServerRateLimit } from './rateLimitStore'
+import { checkServerRateLimit } from './rateLimitStore.js'
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL!,
