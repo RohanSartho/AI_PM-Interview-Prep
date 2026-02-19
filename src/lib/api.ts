@@ -75,5 +75,5 @@ export const api = {
   }) => request<{ sessionId: string }>('/generate-interview', body),
 
   submitAnswer: (body: { questionId: string; userAnswer: string; provider?: LLMProvider }) =>
-    request<{ score: number; feedback: string }>('/submit-answer', body),
+    request<{ score: number; strengths: string; weaknesses: string; suggestion: string }>('/submit-answer', body),
 }

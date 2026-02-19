@@ -9,6 +9,8 @@ interface InterviewState {
   questions: Question[]
   loading: boolean
   error: string | null
+  mode: 'active' | 'review'
+  reviewIndex: number
 
   createSession: (
     jdAnalysisId: string,
@@ -19,6 +21,7 @@ interface InterviewState {
   loadSession: (sessionId: string) => Promise<void>
   submitAnswer: (questionId: string, answer: string) => Promise<void>
   advanceQuestion: () => void
+  setReviewIndex: (index: number) => void
   reset: () => void
 }
 
@@ -27,6 +30,8 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   questions: [],
   loading: false,
   error: null,
+  mode: 'active',
+  reviewIndex: 0,
 
   createSession: async (jdAnalysisId, interviewType, questionCount, provider) => {
     set({ loading: true, error: null })
@@ -61,10 +66,15 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return
     }
 
+    const session = sessionRes.data as InterviewSession
+    const isCompleted = session.status === 'completed'
+
     set({
-      session: sessionRes.data as InterviewSession,
+      session,
       questions: questionsRes.data as Question[],
       loading: false,
+      mode: isCompleted ? 'review' : 'active',
+      reviewIndex: 0,
     })
   },
 
@@ -73,16 +83,19 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     const stored = localStorage.getItem('llm_provider')
     const provider = (stored === 'groq' || stored === 'openrouter') ? stored : 'anthropic' as LLMProvider
     try {
-      const { score, feedback } = await api.submitAnswer({
+      const result = await api.submitAnswer({
         questionId,
         userAnswer: answer,
         provider,
       })
 
+      // Store structured feedback as JSON string in the local question state
+      const feedbackJson = JSON.stringify(result)
+
       set({
         questions: get().questions.map((q) =>
           q.id === questionId
-            ? { ...q, user_answer: answer, ai_feedback: feedback, score }
+            ? { ...q, user_answer: answer, ai_feedback: feedbackJson, score: result.score }
             : q,
         ),
         loading: false,
@@ -94,15 +107,33 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   },
 
   advanceQuestion: () => {
-    const { session } = get()
+    const { session, questions } = get()
     if (!session) return
+
+    const nextIndex = session.current_question_index + 1
+    const isNowComplete = nextIndex >= questions.length
+
     set({
       session: {
         ...session,
-        current_question_index: session.current_question_index + 1,
+        current_question_index: nextIndex,
+        status: isNowComplete ? 'completed' : session.status,
       },
+      mode: isNowComplete ? 'review' : 'active',
+      reviewIndex: 0,
     })
+
+    // Mark session completed in DB if all questions answered
+    if (isNowComplete) {
+      supabase
+        .from('interview_sessions')
+        .update({ status: 'completed', completed_at: new Date().toISOString() })
+        .eq('id', session.id)
+        .then()
+    }
   },
 
-  reset: () => set({ session: null, questions: [], error: null }),
+  setReviewIndex: (index) => set({ reviewIndex: index }),
+
+  reset: () => set({ session: null, questions: [], error: null, mode: 'active', reviewIndex: 0 }),
 }))
