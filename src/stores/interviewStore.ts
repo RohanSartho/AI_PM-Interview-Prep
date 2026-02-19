@@ -10,7 +10,6 @@ interface InterviewState {
   loading: boolean
   error: string | null
   mode: 'active' | 'review'
-  reviewIndex: number
 
   createSession: (
     jdAnalysisId: string,
@@ -21,7 +20,6 @@ interface InterviewState {
   loadSession: (sessionId: string) => Promise<void>
   submitAnswer: (questionId: string, answer: string) => Promise<void>
   advanceQuestion: () => void
-  setReviewIndex: (index: number) => void
   reset: () => void
 }
 
@@ -31,7 +29,6 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
   loading: false,
   error: null,
   mode: 'active',
-  reviewIndex: 0,
 
   createSession: async (jdAnalysisId, interviewType, questionCount, provider) => {
     set({ loading: true, error: null })
@@ -74,7 +71,6 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       questions: questionsRes.data as Question[],
       loading: false,
       mode: isCompleted ? 'review' : 'active',
-      reviewIndex: 0,
     })
   },
 
@@ -120,7 +116,6 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
         status: isNowComplete ? 'completed' : session.status,
       },
       mode: isNowComplete ? 'review' : 'active',
-      reviewIndex: 0,
     })
 
     // Mark session completed in DB if all questions answered
@@ -133,7 +128,5 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
     }
   },
 
-  setReviewIndex: (index) => set({ reviewIndex: index }),
-
-  reset: () => set({ session: null, questions: [], error: null, mode: 'active', reviewIndex: 0 }),
+  reset: () => set({ session: null, questions: [], error: null, mode: 'active' }),
 }))
