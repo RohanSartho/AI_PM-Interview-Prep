@@ -216,4 +216,4 @@ Contributions welcome! Please open an issue first to discuss proposed changes.
 
 For issues or questions:
 - [Open a GitHub issue](https://github.com/RohanSartho/AI_PM-Interview-Prep/issues)
-- Email: rohansartho@gmail.com
+- Email: your-email@example.com
