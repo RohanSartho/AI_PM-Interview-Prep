@@ -1,6 +1,5 @@
 # AI PM Interview Prep
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
 ![React](https://img.shields.io/badge/React-19-blue)
 
@@ -212,10 +211,6 @@ AI-PM-Interview-Prep/
 ## Contributing
 
 Contributions welcome! Please open an issue first to discuss proposed changes.
-
-## License
-
-MIT License — see [LICENSE](LICENSE) file for details.
 
 ## Support
 
