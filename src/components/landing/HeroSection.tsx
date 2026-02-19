@@ -1,31 +1,46 @@
-import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 export default function HeroSection() {
   return (
-    <section className="relative flex min-h-[85vh] items-center justify-center bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-      <div className="mx-auto max-w-3xl px-6 text-center">
-        <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Ace Your PM Interview
-        </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-gray-400">
-          Paste a job description, get a tailored mock interview powered by AI.
-          Practice behavioral, technical, and strategic questions — then get
-          instant, actionable feedback.
-        </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <Link
-            to="/app"
-            className="rounded-lg bg-white px-8 py-3 text-sm font-semibold text-gray-900 shadow-lg hover:bg-gray-100"
-          >
-            Try Free Now
-          </Link>
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Ace Your PM Interview
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Upload your job description. Get personalized interview questions.
+            Practice with AI feedback.
+          </p>
+
           <a
-            href="#pricing"
-            className="rounded-lg border border-gray-600 px-8 py-3 text-sm font-semibold text-gray-300 hover:border-gray-400 hover:text-white"
+            href="#upload"
+            className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 shadow-lg transition"
           >
-            See Pricing
+            Try Free Now &rarr;
           </a>
-        </div>
+          <p className="mt-4 text-sm text-gray-500">
+            No signup required. 5 free tries per day.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative"
+        >
+          <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl p-12 flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="text-6xl mb-4">🎯</div>
+              <p className="text-gray-600">Interview Practice Platform</p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

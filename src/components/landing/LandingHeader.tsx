@@ -5,46 +5,54 @@ export default function LandingHeader() {
   const user = useAuthStore((s) => s.user)
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <Link to="/" className="text-lg font-semibold text-white">
+    <header className="bg-white border-b border-gray-100">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+        <Link to="/" className="text-xl font-bold text-gray-900">
           AI PM Interview Prep
         </Link>
 
         <nav className="flex items-center gap-6">
           <a
             href="#how-it-works"
-            className="hidden text-sm text-gray-300 hover:text-white sm:block"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900"
           >
             How It Works
           </a>
           <a
             href="#pricing"
-            className="hidden text-sm text-gray-300 hover:text-white sm:block"
+            className="hidden sm:block text-sm text-gray-600 hover:text-gray-900"
           >
             Pricing
           </a>
 
           {user ? (
-            <Link
-              to="/app/dashboard"
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100"
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link
+                to="/app/dashboard"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/app"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
+              >
+                New Interview
+              </Link>
+            </>
           ) : (
             <>
               <Link
                 to="/login"
-                className="text-sm text-gray-300 hover:text-white"
+                className="text-sm text-gray-600 hover:text-gray-900"
               >
                 Sign In
               </Link>
               <Link
                 to="/app"
-                className="rounded-md bg-white px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-100"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
               >
-                Try Free
+                Get Started
               </Link>
             </>
           )}

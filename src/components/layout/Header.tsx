@@ -30,7 +30,7 @@ export default function Header() {
           ) : (
             <Link
               to="/login"
-              className="rounded-md bg-gray-900 px-3 py-1.5 text-sm text-white hover:bg-gray-700"
+              className="rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"
             >
               Sign in
             </Link>

@@ -1,52 +1,46 @@
+import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 
-const plans = [
+const tiers = [
   {
     name: 'Free',
-    price: '$0',
-    period: 'forever',
-    description: 'Try it out with no commitment.',
+    price: 0,
     features: [
-      '5 analyses per day',
-      'Basic question generation',
-      'Instant feedback',
-      'Community support',
+      '5 interviews per day',
+      'Basic feedback',
+      'Groq LLM',
+      'All question types',
     ],
-    cta: 'Get Started',
+    cta: 'Start Free',
     ctaLink: '/app',
     highlighted: false,
   },
   {
     name: 'Basic',
-    price: '$9',
-    period: '/mo',
-    description: 'For serious PM candidates.',
-    badge: 'Most Popular',
+    price: 9,
+    badge: 'MOST POPULAR',
     features: [
-      'Unlimited analyses',
-      'Advanced question generation',
-      'Detailed scoring & feedback',
-      'Resume-tailored questions',
-      'Interview history & analytics',
+      'Unlimited interviews',
+      'Detailed feedback',
+      'All LLM providers',
+      'Progress dashboard',
+      'Priority support',
     ],
-    cta: 'Start Basic',
+    cta: 'Upgrade to Basic',
     ctaLink: '/login',
     highlighted: true,
   },
   {
-    name: 'Pro',
-    price: '$29',
-    period: '/mo',
-    description: 'For career changers and coaches.',
+    name: 'Professional',
+    price: 29,
     features: [
       'Everything in Basic',
-      'Multiple LLM providers',
-      'Priority question generation',
-      'Export interview transcripts',
-      'Team & coaching features',
-      'Priority support',
+      'Custom templates',
+      'Interview recordings',
+      'Company insights',
+      'Dedicated support',
     ],
-    cta: 'Start Pro',
+    cta: 'Upgrade to Pro',
     ctaLink: '/login',
     highlighted: false,
   },
@@ -54,74 +48,93 @@ const plans = [
 
 export default function PricingSection() {
   return (
-    <section id="pricing" className="bg-gray-50 py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          Simple, Transparent Pricing
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-center text-gray-500">
-          Start free. Upgrade when you're ready to get serious.
-        </p>
+    <section id="pricing" className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Simple, Transparent Pricing
+          </h2>
+          <p className="text-gray-600 text-lg">
+            Choose the plan that's right for you
+          </p>
+        </motion.div>
 
-        <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={`relative rounded-xl border bg-white p-8 ${
-                plan.highlighted
-                  ? 'border-gray-900 ring-2 ring-gray-900'
-                  : 'border-gray-200'
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {tiers.map((tier, index) => (
+            <motion.div
+              key={tier.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+              className={`rounded-2xl shadow-xl p-8 relative ${
+                tier.highlighted
+                  ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white transform scale-105'
+                  : 'bg-white border-2 border-gray-200'
               }`}
             >
-              {plan.badge && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white">
-                  {plan.badge}
-                </span>
+              {tier.badge && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-sm font-bold">
+                  {tier.badge}
+                </div>
               )}
 
-              <h3 className="text-lg font-semibold text-gray-900">
-                {plan.name}
-              </h3>
-              <div className="mt-2 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-gray-900">
-                  {plan.price}
-                </span>
-                <span className="text-sm text-gray-500">{plan.period}</span>
+              <div className="text-center mb-8">
+                <h3
+                  className={`text-2xl font-bold mb-2 ${tier.highlighted ? '' : 'text-gray-900'}`}
+                >
+                  {tier.name}
+                </h3>
+                <div
+                  className={`text-5xl font-bold mb-2 ${tier.highlighted ? '' : 'text-gray-900'}`}
+                >
+                  ${tier.price}
+                </div>
+                <div
+                  className={
+                    tier.highlighted ? 'opacity-90' : 'text-gray-600'
+                  }
+                >
+                  per month
+                </div>
               </div>
-              <p className="mt-2 text-sm text-gray-500">{plan.description}</p>
 
-              <ul className="mt-6 space-y-3">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm">
+              <ul className="space-y-4 mb-8">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-center">
                     <svg
-                      className="mt-0.5 h-4 w-4 shrink-0 text-gray-900"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
+                      className={`w-5 h-5 mr-3 shrink-0 ${tier.highlighted ? '' : 'text-green-500'}`}
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
                       <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
                       />
                     </svg>
-                    <span className="text-gray-600">{feature}</span>
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <Link
-                to={plan.ctaLink}
-                className={`mt-8 block w-full rounded-lg py-2.5 text-center text-sm font-semibold ${
-                  plan.highlighted
-                    ? 'bg-gray-900 text-white hover:bg-gray-700'
-                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                to={tier.ctaLink}
+                className={`block w-full py-3 rounded-lg font-semibold text-center transition ${
+                  tier.highlighted
+                    ? 'bg-white text-purple-700 hover:bg-gray-100'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
               >
-                {plan.cta}
+                {tier.cta}
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

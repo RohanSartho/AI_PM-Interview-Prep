@@ -1,62 +1,75 @@
+import { motion } from 'framer-motion'
+
 const testimonials = [
   {
-    quote:
-      'I used this to prep for my Google APM interview and felt so much more confident going in. The tailored questions were spot-on.',
     name: 'Sarah Chen',
-    role: 'Product Manager at Google',
-    initials: 'SC',
-    color: 'bg-blue-500',
+    role: 'Senior PM @ Stripe',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+    text: 'Got 3 job offers after practicing here. The feedback was spot-on!',
+    rating: 5,
   },
   {
-    quote:
-      'The instant feedback helped me realize I wasn\'t structuring my answers well. After a week of practice, I landed my dream PM role.',
-    name: 'Marcus Johnson',
-    role: 'Senior PM at Stripe',
-    initials: 'MJ',
-    color: 'bg-emerald-500',
+    name: 'Marcus Williams',
+    role: 'PM @ Google',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus',
+    text: 'Better than expensive interview coaches. Used it for my Google PM interview.',
+    rating: 5,
   },
   {
-    quote:
-      'Way better than generic PM interview question lists. It actually reads the JD and asks relevant questions. Absolute game-changer.',
-    name: 'Priya Patel',
-    role: 'Product Lead at Meta',
-    initials: 'PP',
-    color: 'bg-violet-500',
+    name: 'Priya Sharma',
+    role: 'PM @ Meta',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya',
+    text: 'The AI feedback helped me structure my STAR answers perfectly.',
+    rating: 5,
   },
 ]
 
 export default function TestimonialsSection() {
   return (
-    <section className="bg-white py-20">
-      <div className="mx-auto max-w-6xl px-6">
-        <h2 className="text-center text-3xl font-bold text-gray-900">
-          What PMs Are Saying
-        </h2>
-        <p className="mx-auto mt-3 max-w-lg text-center text-gray-500">
-          Join hundreds of product managers who landed their next role.
-        </p>
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Loved by Product Managers
+          </h2>
+          <p className="text-gray-600 text-lg">
+            Join thousands who landed their dream PM role
+          </p>
+        </motion.div>
 
-        <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
-          {testimonials.map((t) => (
-            <div
-              key={t.name}
-              className="rounded-xl border border-gray-100 bg-gray-50 p-6"
+        <div className="grid md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
+            <motion.div
+              key={testimonial.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-xl shadow-lg p-8 border border-gray-100"
             >
-              <p className="text-sm leading-relaxed text-gray-600">
-                "{t.quote}"
-              </p>
-              <div className="mt-6 flex items-center gap-3">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white ${t.color}`}
-                >
-                  {t.initials}
-                </div>
+              <div className="flex items-center mb-4">
+                <img
+                  src={testimonial.avatar}
+                  alt={testimonial.name}
+                  className="w-12 h-12 rounded-full mr-4"
+                />
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
+                  <div className="font-semibold text-gray-900">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-sm text-gray-600">{testimonial.role}</div>
                 </div>
               </div>
-            </div>
+              <div className="flex mb-4 text-yellow-500">
+                {'⭐'.repeat(testimonial.rating)}
+              </div>
+              <p className="text-gray-700">{testimonial.text}</p>
+            </motion.div>
           ))}
         </div>
       </div>
