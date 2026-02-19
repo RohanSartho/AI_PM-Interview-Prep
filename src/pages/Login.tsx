@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 
 export default function Login() {
@@ -11,6 +11,7 @@ export default function Login() {
 
   const { signIn, signUp } = useAuthStore()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -23,7 +24,8 @@ export default function Login() {
       } else {
         await signIn(email, password)
       }
-      navigate('/dashboard')
+      const redirect = searchParams.get('redirect') || '/app/dashboard'
+      navigate(redirect)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed')
     } finally {

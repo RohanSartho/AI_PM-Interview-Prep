@@ -45,7 +45,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
           <Link
-            to="/jd-parser"
+            to="/app"
             className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
           >
             New Interview
@@ -98,7 +98,7 @@ export default function Dashboard() {
                         </Link>
                       ) : (
                         <Link
-                          to={`/jd-parser?analysisId=${a.id}`}
+                          to={`/app?analysisId=${a.id}`}
                           className="text-sm font-medium text-gray-600 hover:text-gray-900"
                         >
                           Start

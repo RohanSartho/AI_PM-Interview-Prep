@@ -14,10 +14,10 @@ export default function Header() {
         <nav className="flex items-center gap-4">
           {user ? (
             <>
-              <Link to="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/app/dashboard" className="text-sm text-gray-600 hover:text-gray-900">
                 Dashboard
               </Link>
-              <Link to="/jd-parser" className="text-sm text-gray-600 hover:text-gray-900">
+              <Link to="/app" className="text-sm text-gray-600 hover:text-gray-900">
                 New Interview
               </Link>
               <button

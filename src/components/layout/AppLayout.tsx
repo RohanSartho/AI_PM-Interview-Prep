@@ -1,15 +1,9 @@
-import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/stores/authStore'
 import Header from './Header'
 
-export default function Layout() {
-  const initialize = useAuthStore((s) => s.initialize)
+export default function AppLayout() {
   const loading = useAuthStore((s) => s.loading)
-
-  useEffect(() => {
-    initialize()
-  }, [initialize])
 
   if (loading) {
     return (

@@ -100,7 +100,7 @@ export default function JDParser() {
             You've reached the free limit (5 per day). Sign up to continue!
           </p>
           <Link
-            to="/login?redirect=/jd-parser"
+            to="/login?redirect=/app"
             className="inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
           >
             Sign Up
